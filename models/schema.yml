@@ -1,0 +1,128 @@
+version: 2
+
+models:
+  - name: stg_machines
+    columns:
+      - name: machine_id
+        data_tests: [unique, not_null]
+
+  - name: stg_customer_sites
+    columns:
+      - name: site_id
+        data_tests: [unique, not_null]
+
+  - name: stg_telemetry_readings
+    columns:
+      - name: reading_id
+        data_tests: [unique, not_null]
+      - name: machine_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
+
+  - name: stg_fault_codes
+    columns:
+      - name: fault_code
+        data_tests: [unique, not_null]
+      - name: severity
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['INFO', 'WARN', 'CRITICAL']
+
+  - name: stg_maintenance_events
+    columns:
+      - name: maintenance_event_id
+        data_tests: [unique, not_null]
+      - name: machine_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
+      - name: event_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['scheduled', 'unplanned', 'inspection']
+
+  - name: stg_parts_orders
+    columns:
+      - name: parts_order_id
+        data_tests: [unique, not_null]
+      - name: machine_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
+
+  - name: int_machine_daily_telemetry
+    columns:
+      - name: machine_daily_telemetry_id
+        data_tests: [unique, not_null]
+      - name: machine_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
+
+  - name: int_fault_events_enriched
+    columns:
+      - name: fault_event_id
+        data_tests: [unique, not_null]
+      - name: machine_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
+      - name: severity
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['INFO', 'WARN', 'CRITICAL']
+
+  - name: int_maintenance_with_cost
+    columns:
+      - name: maintenance_event_id
+        data_tests: [unique, not_null]
+      - name: machine_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
+
+
+
+  - name: feature_machine_failure_prediction
+    description: Feast-ready machine-day feature table for failure-prediction training and inference, keyed by machine and point-in-time feature timestamp.
+    columns:
+      - name: machine_failure_prediction_feature_id
+        description: Deterministic dbt surrogate key for the machine and feature date.
+        data_tests: [unique, not_null]
+      - name: machine_id
+        description: Feast entity key identifying the machine.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_machine')
+                field: machine_id
+      - name: feature_timestamp
+        description: Feast event timestamp at the end of the feature calendar day.
+        data_tests: [not_null]
+      - name: rolling_7d_avg_fuel_rate_gph
+        description: Trailing seven-calendar-day mean fuel rate.
+      - name: rolling_7d_engine_hour_delta
+        description: Trailing seven-calendar-day observed engine-hour increase.
+      - name: critical_fault_count_30d
+        description: Trailing 30-calendar-day count of CRITICAL fault events.
+      - name: days_since_last_maintenance
+        description: Calendar days since the most recent maintenance event available at the feature timestamp.
+      - name: payload_variance_7d
+        description: Trailing seven-calendar-day sample variance of daily average payload.
