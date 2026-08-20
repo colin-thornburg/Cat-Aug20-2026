@@ -1,0 +1,88 @@
+version: 2
+
+seeds:
+  - name: seed_machines
+    description: Connected Cat fleet master data, one row per machine.
+    columns:
+      - name: machine_id
+        description: Fleet machine identifier.
+        data_tests: [unique, not_null]
+      - name: customer_site_id
+        description: Current customer operating site.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('seed_customer_sites')
+                field: site_id
+
+  - name: seed_customer_sites
+    description: Customer operating sites for mining, construction, and quarry fleets.
+    columns:
+      - name: site_id
+        description: Customer site identifier.
+        data_tests: [unique, not_null]
+
+  - name: seed_telemetry_readings
+    description: Point-in-time machine telemetry observations from the Cat connected-fleet platform.
+    columns:
+      - name: reading_id
+        description: Unique telemetry observation identifier.
+        data_tests: [unique, not_null]
+      - name: machine_id
+        description: Machine that emitted the telemetry observation.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('seed_machines')
+                field: machine_id
+      - name: reading_ts
+        description: Snowflake TIMESTAMP_NTZ captured at the machine.
+        data_tests: [not_null]
+      - name: fault_code
+        description: Nullable active diagnostic code observed with the reading.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('seed_fault_codes')
+                field: fault_code
+
+  - name: seed_fault_codes
+    description: Caterpillar diagnostic code reference data with operational severity and subsystem.
+    columns:
+      - name: fault_code
+        description: Diagnostic fault code.
+        data_tests: [unique, not_null]
+
+  - name: seed_maintenance_events
+    description: Scheduled, unplanned, and inspection maintenance events at machine grain.
+    columns:
+      - name: event_id
+        description: Unique maintenance event identifier.
+        data_tests: [unique, not_null]
+      - name: machine_id
+        description: Machine receiving maintenance.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('seed_machines')
+                field: machine_id
+      - name: event_ts
+        description: Snowflake TIMESTAMP_NTZ when maintenance began.
+        data_tests: [not_null]
+
+  - name: seed_parts_orders
+    description: Parts supply orders associated with the connected fleet.
+    columns:
+      - name: order_id
+        description: Unique parts order identifier.
+        data_tests: [unique, not_null]
+      - name: machine_id
+        description: Machine requiring the ordered part.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('seed_machines')
+                field: machine_id
+      - name: order_ts
+        description: Snowflake TIMESTAMP_NTZ when the order was placed.
+        data_tests: [not_null]

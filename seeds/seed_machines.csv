@@ -1,0 +1,25 @@
+machine_id,serial_number,model,family,model_year,sold_date,dealer_region,customer_site_id
+1001,CAT793F-MIN-001,793F haul truck,mining truck,2018,2018-06-15,North America,2001
+1002,CAT793F-MIN-002,793F haul truck,mining truck,2019,2019-03-22,North America,2001
+1003,CAT793F-MIN-003,793F haul truck,mining truck,2020,2020-09-10,Latin America,2002
+1004,CATD11-CON-001,D11 dozer,track-type tractor,2017,2017-11-05,North America,2003
+1005,CATD11-CON-002,D11 dozer,track-type tractor,2021,2021-04-18,Asia Pacific,2004
+1006,CAT336-CON-001,336 excavator,excavator,2020,2020-02-14,North America,2003
+1007,CAT336-CON-002,336 excavator,excavator,2022,2022-07-30,Europe Africa Middle East,2005
+1008,CAT980M-QUA-001,980M loader,wheel loader,2019,2019-08-26,North America,2006
+1009,CAT980M-QUA-002,980M loader,wheel loader,2021,2021-05-12,Latin America,2002
+1010,CAT740GC-CON-001,740 GC articulated truck,articulated truck,2022,2022-01-19,Asia Pacific,2004
+1011,CAT320-CON-001,320 excavator,excavator,2018,2018-10-03,Europe Africa Middle East,2005
+1012,CAT950GC-QUA-001,950 GC loader,wheel loader,2023,2023-03-16,North America,2006
+1013,CATD10T-MIN-001,D10T2 dozer,track-type tractor,2019,2019-12-08,Latin America,2002
+1014,CAT777G-MIN-001,777G haul truck,mining truck,2020,2020-06-27,North America,2001
+1015,CAT390-CON-001,390 excavator,excavator,2021,2021-09-21,North America,2003
+1016,CAT972M-QUA-001,972M loader,wheel loader,2018,2018-04-11,Asia Pacific,2004
+1017,CATD6T-CON-001,D6T dozer,track-type tractor,2022,2022-11-09,Europe Africa Middle East,2005
+1018,CAT730-CON-001,730 articulated truck,articulated truck,2023,2023-06-04,North America,2003
+1019,CAT349-CON-001,349 excavator,excavator,2019,2019-07-17,Latin America,2002
+1020,CAT966M-QUA-001,966M loader,wheel loader,2020,2020-12-02,North America,2006
+1021,CAT794AC-MIN-001,794 AC haul truck,mining truck,2022,2022-08-15,North America,2001
+1022,CATD8T-MIN-001,D8T dozer,track-type tractor,2021,2021-02-25,Latin America,2002
+1023,CAT374-CON-001,374 excavator,excavator,2023,2023-04-28,Asia Pacific,2004
+1024,CAT982M-QUA-001,982M loader,wheel loader,2022,2022-10-07,Europe Africa Middle East,2005

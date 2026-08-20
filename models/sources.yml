@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: cat_digital_seeded
+    description: Seeded telemetry relation monitored as the Cat Digital telemetry landing source.
+    schema: "{{ target.schema }}"
+    tables:
+      - name: telemetry_readings
+        identifier: seed_telemetry_readings
+        description: Raw machine telemetry readings used for freshness monitoring.
+        config:
+          freshness:
+            warn_after: {count: 24, period: hour}
+            error_after: {count: 48, period: hour}
+

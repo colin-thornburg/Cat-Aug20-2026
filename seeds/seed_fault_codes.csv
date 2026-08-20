@@ -1,0 +1,25 @@
+fault_code,description,severity,subsystem
+E1001,Engine coolant temperature high,WARN,engine
+E1002,Engine oil pressure low,CRITICAL,engine
+E1003,Engine overspeed detected,CRITICAL,engine
+E1004,Air filter restriction high,WARN,engine
+H2001,Hydraulic oil temperature high,WARN,hydraulics
+H2002,Hydraulic system pressure low,CRITICAL,hydraulics
+H2003,Implement pilot pressure sensor,INFO,hydraulics
+P3001,Transmission oil temperature high,WARN,powertrain
+P3002,Transmission shift fault,CRITICAL,powertrain
+P3003,Final drive filter restriction,WARN,powertrain
+P3004,Brake accumulator pressure low,CRITICAL,powertrain
+EL4001,Battery voltage low,WARN,electrical
+EL4002,Alternator charging fault,CRITICAL,electrical
+EL4003,Machine control module communication,INFO,electrical
+EL4004,GPS antenna signal weak,INFO,electrical
+E1005,Fuel water separator service due,INFO,engine
+H2004,Hydraulic filter restriction,WARN,hydraulics
+P3005,Driveline vibration threshold exceeded,WARN,powertrain
+EL4005,Starter relay circuit fault,WARN,electrical
+E1006,Aftertreatment regeneration required,INFO,engine
+H2005,Auxiliary hydraulic flow low,WARN,hydraulics
+P3006,Torque converter lockup fault,CRITICAL,powertrain
+EL4006,Telematics modem offline,INFO,electrical
+E1007,DEF quality sensor fault,WARN,engine

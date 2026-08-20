@@ -1,0 +1,260 @@
+version: 2
+
+models:
+  - name: dim_machine
+    description: Conformed machine dimension joining fleet asset attributes to the current customer operating site.
+    config:
+      contract:
+        enforced: true
+    semantic_model:
+      enabled: true
+    columns:
+      - name: machine_id
+        description: Stable Cat Digital machine identifier and primary key for the dimension.
+        data_type: NUMBER(38,0)
+        constraints: [{type: not_null}]
+        data_tests: [unique, not_null]
+        entity: {type: primary, name: machine}
+      - name: serial_number
+        description: Manufacturer serial number for the physical machine.
+        data_type: VARCHAR
+      - name: model
+        description: Caterpillar model designation.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: machine_family
+        description: Product family used to group similar machine types.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: model_year
+        description: Machine manufacturing model year.
+        data_type: NUMBER(4,0)
+      - name: sold_date
+        description: Date on which the machine was sold to the customer.
+        data_type: DATE
+      - name: dealer_region
+        description: Caterpillar dealer sales and service region.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: site_id
+        description: Identifier of the machine's current customer operating site.
+        data_type: NUMBER(38,0)
+      - name: site_name
+        description: Customer-facing operating site name.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: industry
+        description: Operating industry classification for the site.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: country
+        description: Country in which the machine operates.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: region
+        description: Geographic region within the operating country.
+        data_type: VARCHAR
+        dimension: {type: categorical}
+      - name: latitude
+        description: Latitude of the customer operating site.
+        data_type: FLOAT
+      - name: longitude
+        description: Longitude of the customer operating site.
+        data_type: FLOAT
+
+  - name: fct_machine_health
+    description: One row per machine summarizing latest telemetry, diagnostic-fault severity, maintenance downtime, and estimated uptime.
+    config:
+      contract:
+        enforced: true
+    semantic_model:
+      enabled: true
+    agg_time_dimension: latest_telemetry_date
+    columns:
+      - name: machine_health_id
+        description: Primary key for the machine-health fact.
+        data_type: NUMBER(38,0)
+        constraints: [{type: not_null}]
+        data_tests: [unique, not_null]
+        entity: {type: primary, name: machine_health}
+      - name: machine_id
+        description: Foreign key to the conformed machine dimension.
+        data_type: NUMBER(38,0)
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_machine'), field: machine_id}
+        entity: {type: foreign, name: machine}
+      - name: latest_telemetry_date
+        description: Most recent telemetry calendar date available for the machine.
+        data_type: DATE
+        granularity: day
+        dimension: {type: time}
+      - name: telemetry_reading_count
+        description: Number of telemetry observations contributing to the health rollup.
+        data_type: NUMBER(38,0)
+      - name: total_engine_hours
+        description: Observed operating-hour increase from the first to latest telemetry reading; never a sum of cumulative readings.
+        data_type: FLOAT
+      - name: active_hours
+        description: Active operating hours in the observed telemetry window.
+        data_type: FLOAT
+      - name: available_hours
+        description: Inclusive calendar hours in the observed telemetry window.
+        data_type: FLOAT
+      - name: avg_fuel_rate_gph
+        description: Reading-weighted average fuel consumption in gallons per hour.
+        data_type: FLOAT
+      - name: max_coolant_temp_c
+        description: Highest observed coolant temperature in degrees Celsius.
+        data_type: FLOAT
+      - name: idle_ratio
+        description: Fraction of telemetry readings where the machine was idling.
+        data_type: FLOAT
+      - name: fault_event_count
+        description: Total diagnostic fault events.
+        data_type: NUMBER(38,0)
+      - name: info_fault_count
+        description: Count of INFO severity fault events.
+        data_type: NUMBER(38,0)
+      - name: warn_fault_count
+        description: Count of WARN severity fault events.
+        data_type: NUMBER(38,0)
+      - name: critical_fault_count
+        description: Count of CRITICAL severity fault events requiring urgent attention.
+        data_type: NUMBER(38,0)
+      - name: downtime_hours
+        description: Total maintenance downtime recorded for the machine.
+        data_type: FLOAT
+      - name: maintenance_cost_usd
+        description: Total recorded maintenance cost in United States dollars.
+        data_type: NUMBER(14,2)
+      - name: uptime_pct
+        description: Estimated uptime percentage based on recorded downtime and telemetry coverage.
+        data_type: FLOAT
+    metrics:
+      - name: total_engine_hours
+        label: Total Engine Hours
+        description: Observed engine-hour increase across the selected fleet and telemetry window; cumulative readings are never summed.
+        type: simple
+        agg: sum
+        expr: total_engine_hours
+      - name: critical_fault_events
+        label: Critical Fault Events
+        description: Count of telemetry fault events classified as CRITICAL.
+        type: simple
+        agg: sum
+        expr: critical_fault_count
+      - name: total_fault_events
+        label: Total Fault Events
+        description: Count of all enriched telemetry fault events regardless of severity.
+        type: simple
+        agg: sum
+        expr: fault_event_count
+      - name: critical_fault_rate
+        label: Critical Fault Rate
+        description: Critical fault events divided by all fault events for the same selected fleet and time window.
+        type: ratio
+        numerator: critical_fault_events
+        denominator: total_fault_events
+      - name: avg_downtime_hours
+        label: Average Downtime Hours per Machine
+        description: Arithmetic average of total recorded maintenance downtime across selected machines.
+        type: simple
+        agg: average
+        expr: downtime_hours
+      - name: active_hours
+        label: Active Hours
+        description: Sum of observed operating-hour increases across selected machines.
+        type: simple
+        agg: sum
+        expr: active_hours
+      - name: available_hours
+        label: Available Hours
+        description: Sum of inclusive telemetry-window calendar hours across selected machines.
+        type: simple
+        agg: sum
+        expr: available_hours
+      - name: fleet_utilization_rate
+        label: Fleet Utilization Rate
+        description: Pooled active hours divided by pooled available hours; this is not an average of per-machine utilization percentages.
+        type: ratio
+        numerator: active_hours
+        denominator: available_hours
+
+  - name: fct_maintenance_cost
+    description: Machine-level maintenance cost and downtime rollup, sliceable by Caterpillar model, customer site, and operating region.
+    semantic_model:
+      enabled: true
+    agg_time_dimension: maintenance_date
+
+    columns:
+      - name: maintenance_cost_id
+        description: Deterministic primary key derived from machine, model, site, and region.
+        data_tests: [unique, not_null]
+        entity: {type: primary, name: maintenance_cost}
+      - name: machine_id
+        description: Machine contributing maintenance activity to this rollup.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_machine'), field: machine_id}
+        entity: {type: foreign, name: machine}
+      - name: maintenance_date
+        description: Calendar date on which the maintenance event occurred.
+        granularity: day
+        dimension: {type: time}
+
+      - name: model
+        description: Caterpillar machine model associated with maintenance activity.
+        dimension: {type: categorical}
+      - name: site_id
+        description: Customer operating site identifier.
+      - name: site_name
+        description: Customer operating site name.
+        dimension: {type: categorical}
+      - name: region
+        description: Geographic operating region.
+        dimension: {type: categorical}
+      - name: maintenance_event_count
+        description: Count of maintenance events contributing to the rollup.
+      - name: scheduled_event_count
+        description: Count of planned scheduled maintenance events.
+      - name: unplanned_event_count
+        description: Count of unplanned corrective maintenance events.
+      - name: downtime_hours
+        description: Total downtime hours across contributing maintenance events.
+      - name: maintenance_cost_usd
+        description: Total maintenance cost in United States dollars.
+      - name: avg_event_cost_usd
+        description: Average cost per maintenance event in United States dollars.
+    metrics:
+      - name: total_maintenance_cost_usd
+        label: Total Maintenance Cost USD
+        description: Total recorded maintenance cost in United States dollars.
+        type: simple
+        agg: sum
+        expr: maintenance_cost_usd
+      - name: maintained_machine_count
+        label: Maintained Machine Count
+        description: Distinct machines with recorded maintenance activity.
+        type: simple
+        agg: count_distinct
+        expr: machine_id
+      - name: maintenance_cost_per_machine
+        label: Maintenance Cost per Machine
+        description: Total maintenance cost divided by distinct machines with maintenance activity for the same filters.
+        type: ratio
+        numerator: total_maintenance_cost_usd
+        denominator: maintained_machine_count
+
+
+
+  - name: time_spine_daily
+    description: Daily MetricFlow time spine covering the Cat Digital telemetry analysis horizon.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: Calendar date at daily grain.
+        granularity: day
