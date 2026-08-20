@@ -1,0 +1,30 @@
+version: 2
+
+exposures:
+  - name: machine_failure_scoring_application
+    label: Machine Failure Scoring Application
+    type: application
+    maturity: high
+    url: https://fleetops.catdigital.example/applications/machine-failure-scoring
+    description: >
+      Custom operations application that retrieves point-in-time Feast features
+      and serves machine failure-risk scores to fleet planners and maintenance teams.
+    depends_on:
+      - ref('feature_machine_failure_prediction')
+    owner:
+      name: Cat Digital Predictive Maintenance
+      email: predictive-maintenance@catdigital.example
+
+  - name: fleet_health_operations_dashboard
+    label: Fleet Health Operations Dashboard
+    type: dashboard
+    maturity: high
+    url: https://bi.catdigital.example/dashboards/fleet-health-operations
+    description: >
+      Business intelligence dashboard for fleet managers to monitor uptime,
+      telemetry coverage, coolant risk, maintenance cost, and fault severity by machine.
+    depends_on:
+      - ref('fct_machine_health')
+    owner:
+      name: Cat Digital Fleet Analytics
+      email: fleet-analytics@catdigital.example
